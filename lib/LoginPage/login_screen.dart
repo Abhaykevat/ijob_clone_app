@@ -15,7 +15,9 @@ class Login extends StatefulWidget {
   State<Login> createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> with TickerProviderStateMixin{
+class _LoginState extends State<Login> with TickerProviderStateMixin
+{
+
   late Animation<double> _animation;
   late AnimationController _animationController;
 
@@ -36,6 +38,9 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
   @override
   void dispose() {
     _animationController.dispose();
+    _emailTextController.dispose();
+    _passTextController.dispose();
+    _passFocusNode.dispose();
     super.dispose();
   }
 
