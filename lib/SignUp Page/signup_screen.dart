@@ -17,8 +17,10 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
 
   late Animation<double> _animation;
   late AnimationController _animationController;
+  
   final _signUpFormKey=GlobalKey<FormState>();
 
+  final FocusNode _emailFocusNode=FocusNode();
   final FocusNode _passFocusNode=FocusNode();
 
   File? imageFile;
@@ -26,6 +28,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
 
   final _loginFormKey=GlobalKey<FormState>();
 
+  final TextEditingController _fullNameController =TextEditingController(text: '');
   final TextEditingController _emailTextController=TextEditingController(text: '');
   final TextEditingController _passTextController=TextEditingController(text: '');
 
@@ -40,7 +43,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
     _animationController.dispose();
     _emailTextController.dispose();
     _passTextController.dispose();
-    _passFocusNode.dispose();
+    // _passFocusNode.dispose(); 
     super.dispose();
   }
 
@@ -133,11 +136,95 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
                                 child: ClipRRect(borderRadius: BorderRadius.circular(16),
                                 child: imageFile == null 
                                  ? Icon(Icons.camera_enhance_sharp,color: Colors.cyan,size: 30,)
-                                 : Image.file(imageFile!,fit: BoxFit.fill,)
+                                 : Image.file(imageFile!,fit: BoxFit.fill,),
                                 ),
+
                               ),
                             ),
-                          )
+                          ),
+                          SizedBox(height: 20,),
+                          TextFormField(
+                      textInputAction: TextInputAction.next,
+                      onEditingComplete: ()=>FocusScope.of(context).requestFocus(_emailFocusNode),
+                      keyboardType: TextInputType.name,
+                      controller: _fullNameController,
+                      validator: (value){
+                        if(value!.isEmpty){
+                          return 'This field is missing';
+                        }
+                        else{
+                          return null;
+                        }
+                      },
+                      style:const  TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: 'fullname / Company name',
+                        hintStyle: TextStyle(color: Colors.white),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        errorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red
+                        ))
+                      ),
+                    ),
+                    const SizedBox(height: 20,),
+                    TextFormField(
+                      textInputAction: TextInputAction.next,
+                      onEditingComplete: ()=>FocusScope.of(context).requestFocus(_passFocusNode),
+                      keyboardType: TextInputType.emailAddress,
+                      controller: _emailTextController ,
+                      validator: (value){
+                        if(value!.isEmpty || !value.contains('@')){
+                          return 'Please enter a valid email address';
+                        }
+                        else{
+                          return null;
+                        }
+                      },
+                      style:const  TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: 'Email',
+                        hintStyle: TextStyle(color: Colors.white),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        errorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red
+                        ))
+                      ),
+                    ),
+                    SizedBox(height: 20,),
+                    TextFormField(
+                      textInputAction: TextInputAction.next,
+                      onEditingComplete: ()=>FocusScope.of(context).requestFocus(_passFocusNode),
+                      keyboardType: TextInputType.emailAddress,
+                      controller: _emailTextController ,
+                      validator: (value){
+                        if(value!.isEmpty || !value.contains('@')){
+                          return 'Please enter a valid email address';
+                        }
+                        else{
+                          return null;
+                        }
+                      },
+                      style:const  TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: 'Password',
+                        hintStyle: TextStyle(color: Colors.white),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        errorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red
+                        ))
+                      ),
+                    ),
+                    
+                    
                         ],
                       ),
                     )
