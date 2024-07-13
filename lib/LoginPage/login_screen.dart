@@ -1,6 +1,12 @@
 // import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:ijob_clone_app/ForgetPassword/forget_password_screen.dart';
+import 'package:ijob_clone_app/SignUp%20Page/signup_screen.dart';
+import 'package:ijob_clone_app/services/global_methods.dart';
 // import 'package:ijob_clone_app/services/global_variables.dart';
 
 class Login extends StatefulWidget {
@@ -22,6 +28,9 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
   final TextEditingController _passTextController=TextEditingController(text: '');
 
   bool _obscureText=true;
+  bool _isLoading=false;
+
+  final FirebaseAuth _auth=FirebaseAuth.instance;
 
   
   @override
@@ -48,6 +57,35 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
     _animationController.forward();
     super.initState();
   }
+  void _submitFormOnLogin() async
+  {
+    final isValid=_loginFormKey.currentState!.validate();
+    if(isValid)
+    {
+      setState(() {
+        _isLoading=true;
+      });
+      try
+      {
+        await _auth.signInWithEmailAndPassword(email: _emailTextController.text.trim(), password:_passTextController.text.trim());
+        Navigator.canPop(context) ? Navigator.pop(context) : null;
+      }
+      catch(error)
+      {
+        setState(() {
+          _isLoading=false;
+        });
+        GlobalMethod.showErrorDialog(error: error.toString(), ctx: context);
+        print('error occured $error');
+      }
+    }
+    setState(() {
+      _isLoading=false;      
+    });
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,8 +176,45 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
                         errorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red
                         ))
                       ),
-                    )
-
+                    ),
+                     SizedBox(height: 15,),
+                     Align(
+                      alignment: Alignment.bottomRight,
+                      child: TextButton(onPressed: (){
+                        Navigator.push(context, MaterialPageRoute(builder:(context)=>ForgetPassword() ));
+                      },child: Text("Forget Password",style: TextStyle(color: Colors.white,fontSize: 17,fontStyle: FontStyle.italic),),),
+                     ),
+                     const SizedBox(height: 15,),
+                     MaterialButton(
+                      onPressed: _submitFormOnLogin,color: Colors.cyan,elevation: 8,shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)
+                      ),
+                      child: Padding(padding: EdgeInsets.symmetric(vertical: 14),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Login',style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.bold),)
+                        ],
+                      ),
+                      ),
+                      ),
+                      SizedBox(height: 15,),
+                      Center(
+                        child: RichText(text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Dont have an account",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,fontWeight: FontWeight.bold ),
+                                ),
+                                TextSpan(text: '   '),
+                                TextSpan(recognizer: TapGestureRecognizer()
+                                ..onTap=()=>Navigator.push(context,MaterialPageRoute(builder: (context)=>SignUp())),
+                                text: 'Sign Up',style: TextStyle(color: Colors.cyan,fontWeight: FontWeight.bold,fontSize: 16)
+                                ),
+                          ]
+                        ),),
+                      )
                   ],
                 ),)
               ],
