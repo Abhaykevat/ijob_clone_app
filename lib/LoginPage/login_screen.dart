@@ -153,9 +153,9 @@ class _LoginState extends State<Login> with TickerProviderStateMixin
                       focusNode: _passFocusNode,
                       keyboardType: TextInputType.visiblePassword,
                       controller: _passTextController,
-                      obscureText: !_obscureText,
+                      obscureText: !_obscureText, 
                       validator: (value){
-                        if(value!.isEmpty || value.length <7){
+                        if(value!.isEmpty || value.length < 7){
                           return 'Please enter a valid password';
                         }else{
                            return null;

@@ -22,6 +22,8 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
 
   final FocusNode _emailFocusNode=FocusNode();
   final FocusNode _passFocusNode=FocusNode();
+  final FocusNode _phoneNumberFocusNode=FocusNode();
+
 
   File? imageFile;
 
@@ -196,22 +198,31 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
                         ))
                       ),
                     ),
-                    SizedBox(height: 20,),
+                    const SizedBox(height: 20,),
                     TextFormField(
                       textInputAction: TextInputAction.next,
-                      onEditingComplete: ()=>FocusScope.of(context).requestFocus(_passFocusNode),
-                      keyboardType: TextInputType.emailAddress,
-                      controller: _emailTextController ,
+                      onEditingComplete: ()=>FocusScope.of(context).requestFocus(_phoneNumberFocusNode),
+                      keyboardType: TextInputType.visiblePassword,
+                      controller: _passTextController,
+                      obscureText: !_obscureText,
                       validator: (value){
-                        if(value!.isEmpty || !value.contains('@')){
-                          return 'Please enter a valid email address';
+                        if(value!.isEmpty || value.length<7){
+                          return 'Please enter a valid password';
                         }
                         else{
                           return null;
                         }
                       },
                       style:const  TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
+                      decoration:  InputDecoration(
+                        suffixIcon: GestureDetector(
+                          onTap: (){
+                            setState(() {
+                              _obscureText=!_obscureText;
+                            });
+                          },
+                          child: Icon(_obscureText ? Icons.visibility : Icons.visibility_off,color: Colors.white,),
+                        ),
                         hintText: 'Password',
                         hintStyle: TextStyle(color: Colors.white),
                         enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white),
