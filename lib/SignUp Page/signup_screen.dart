@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ijob_clone_app/services/global_methods.dart';
@@ -23,6 +24,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
   final FocusNode _emailFocusNode=FocusNode();
   final FocusNode _passFocusNode=FocusNode();
   final FocusNode _phoneNumberFocusNode=FocusNode();
+  final FocusNode _positionCPFocusNode=FocusNode();
 
 
   File? imageFile;
@@ -33,6 +35,8 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
   final TextEditingController _fullNameController =TextEditingController(text: '');
   final TextEditingController _emailTextController=TextEditingController(text: '');
   final TextEditingController _passTextController=TextEditingController(text: '');
+  final TextEditingController _phoneNumberTextController=TextEditingController(text: '');
+  final  TextEditingController _locationTextController=TextEditingController(text: '');
 
   bool _obscureText=true;
   bool _isLoading=false;
@@ -234,8 +238,106 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
                         ))
                       ),
                     ),
-                    
-                    
+                    SizedBox(height: 20,),
+                    TextFormField(
+                      textInputAction: TextInputAction.next,
+                      onEditingComplete: ()=>FocusScope.of(context).requestFocus(_positionCPFocusNode),
+                      keyboardType: TextInputType.phone,
+                      controller: _phoneNumberTextController,
+                      validator: (value){
+                        if(value!.isEmpty){
+                          return 'This field is missing.';
+                        }
+                        else{
+                          return null;
+                        }
+                      },
+                      style:const  TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: 'Phone Number',
+                        hintStyle: TextStyle(color: Colors.white),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        errorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red
+                        ))
+                      ),
+                    ),
+                    SizedBox(height: 20,),
+                    TextFormField(
+                      textInputAction: TextInputAction.next,
+                      onEditingComplete: ()=>FocusScope.of(context).requestFocus(_positionCPFocusNode),
+                      keyboardType: TextInputType.text,
+                      controller:_locationTextController ,
+                      validator: (value){
+                        if(value!.isEmpty){
+                          return 'This field is missing.';
+                        }
+                        else{
+                          return null;
+                        }
+                      },
+                      style:const  TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: 'Company Address ',
+                        hintStyle: TextStyle(color: Colors.white),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        errorBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.red
+                        ))
+                      ),
+                    ),
+                    SizedBox(height: 25,),
+                    _isLoading
+                    ?
+                    Center(child: Container(width: 70,height: 70,
+                    child: CircularProgressIndicator(),
+                    ),
+                    )
+                    :
+                    MaterialButton(
+                      onPressed: (){
+                        // create submit form on sign up 
+                      },
+                      color: Colors.cyan,
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Submit',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20),)
+                          ],
+                        ),
+                      ),
+                      ),
+                      SizedBox(height: 40,),
+                      Center(child: RichText(text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Already Have an account ? ',
+                          style: TextStyle(
+                            color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16)
+
+                          
+                        ),
+                        TextSpan(text: ' '),
+                        TextSpan(recognizer: TapGestureRecognizer()
+                        ..onTap=()=> Navigator.canPop(context)
+                        ? Navigator.pop(context)
+                        : null,
+                        text: 'Login',
+                        style: TextStyle(color: Colors.cyan,fontWeight: FontWeight.bold,fontSize: 16)
+                        )
+                      ]
+                      )),)
+
                         ],
                       ),
                     )
