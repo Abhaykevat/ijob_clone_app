@@ -1,11 +1,15 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ijob_clone_app/services/global_methods.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SignUp extends StatefulWidget {
 
@@ -28,9 +32,10 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
 
 
   File? imageFile;
+  String? imageUrl;
 
 
-  final _loginFormKey=GlobalKey<FormState>();
+  // final _loginFormKey=GlobalKey<FormState>();
 
   final TextEditingController _fullNameController =TextEditingController(text: '');
   final TextEditingController _emailTextController=TextEditingController(text: '');
@@ -47,9 +52,15 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
   @override
   void dispose() {
     _animationController.dispose();
+    _fullNameController.dispose();
     _emailTextController.dispose();
     _passTextController.dispose();
-    // _passFocusNode.dispose(); 
+    _phoneNumberTextController.dispose();
+    _locationTextController.dispose();
+    _emailFocusNode.dispose();
+    _passFocusNode.dispose();
+    _phoneNumberFocusNode.dispose();
+    _positionCPFocusNode.dispose();
     super.dispose();
   }
 
@@ -71,33 +82,147 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
     _animationController.forward();
     super.initState();
   }
-  void _submitFormOnLogin() async
+
+  void _showImageDialog(){
+    showDialog(
+      context:context,
+      builder: (context){
+        return AlertDialog(title: Text('Please choose an option'),
+        content: Column(mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: (){
+              //create  getfromcamera
+               _getFromCamera();
+            },
+            child: Row(
+              children: [
+              Padding(padding: EdgeInsets.all(4.0),
+              child: Icon(Icons.camera,color: Colors.purple,),
+              ),
+              Text('Camera',style: TextStyle(color: Colors.purple),)
+            ],),
+          ),
+          SizedBox(height: 10,),
+          InkWell(
+            onTap: (){
+              //create  getfromgalery
+              _getFromGallery();
+            },
+            child: Row(
+              children: [
+              Padding(padding: EdgeInsets.all(4.0),
+              child: Icon(Icons.image,color: Colors.purple,),
+              ),
+              Text('Gallery ',style: TextStyle(color: Colors.purple),)
+            ],),
+          ),
+          
+        ],
+        ),
+        );
+      });
+  }
+
+  void _getFromCamera() async
   {
-    final isValid=_loginFormKey.currentState!.validate();
+    XFile? pickFile=await ImagePicker().pickImage(source: ImageSource.camera);
+    _cropImage(pickFile!.path);
+    Navigator.pop(context);
+  }
+
+  void _getFromGallery() async
+  {
+    XFile? pickFile=await ImagePicker().pickImage(source: ImageSource.gallery);
+    _cropImage(pickFile!.path);
+    Navigator.pop(context);
+  }
+  void _cropImage(filePath) async
+  {
+    CroppedFile? croppedImage= await  ImageCropper().cropImage(
+      sourcePath: filePath,maxHeight: 1080,maxWidth: 1080);
+      if(croppedImage != null)
+      {
+        setState(() {
+          imageFile=File(croppedImage.path);
+        });
+      }
+
+  }
+  // void _submitFormOnSignUp() async
+  // {
+  //   final isValid=_signUpFormKey.currentState!.validate();
+  //   if(isValid)
+  //   {
+  //     setState(() {
+  //       _isLoading=true;
+  //     });
+  //     try
+  //     {
+  //       await _auth.signInWithEmailAndPassword(email: _emailTextController.text.trim(), password:_passTextController.text.trim());
+  //       Navigator.canPop(context) ? Navigator.pop(context) : null;
+  //     }
+  //     catch(error)
+  //     {
+  //       setState(() {
+  //         _isLoading=false;
+  //       });
+  //       GlobalMethod.showErrorDialog(error: error.toString(), ctx: context);
+  //       print('error occured $error');
+  //     }
+  //   }
+  //   setState(() {
+  //     _isLoading=false;
+  //   });
+  // }
+
+  void _submitFormOnSignUp() async
+  {
+    final isValid =_signUpFormKey.currentState!.validate();
     if(isValid)
     {
+      if(imageFile == null)
+      {
+        GlobalMethod.showErrorDialog(error: 'Please pick an image', ctx: context);
+        return;
+      }
       setState(() {
         _isLoading=true;
       });
       try
       {
-        await _auth.signInWithEmailAndPassword(email: _emailTextController.text.trim(), password:_passTextController.text.trim());
-        Navigator.canPop(context) ? Navigator.pop(context) : null;
-      }
-      catch(error)
+        await _auth.createUserWithEmailAndPassword(
+          email: _emailTextController.text.trim().toLowerCase(),
+          password: _passTextController.text.trim().toLowerCase()
+        );
+        final User? user = _auth.currentUser;
+        final _uid=user!.uid;
+        final ref=FirebaseStorage.instance.ref().child('userImages').child(_uid + '.jpg');
+        await ref.putFile(imageFile!);
+        imageUrl = await ref.getDownloadURL();
+        FirebaseFirestore.instance.collection('users').doc(_uid).set({
+          'id':_uid,
+          'name': _fullNameController.text,
+          'email': _emailTextController.text,
+          'userImage': imageUrl,
+          'phoneNumber': _phoneNumberTextController.text,
+          'location': _locationTextController.text,
+          'createdAt':Timestamp.now(),
+        });
+        Navigator.canPop(context) ? Navigator.of(context) :null; 
+      }catch (error)
       {
         setState(() {
           _isLoading=false;
         });
         GlobalMethod.showErrorDialog(error: error.toString(), ctx: context);
-        print('error occured $error');
       }
     }
     setState(() {
       _isLoading=false;
     });
-  }
 
+  }
 
 
   @override
@@ -129,7 +254,9 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
                       child: Column(
                         children: [
                           GestureDetector(
-                            onTap: (){},
+                            onTap: (){
+                              _showImageDialog();
+                            },
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Container(
@@ -303,6 +430,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin
                     MaterialButton(
                       onPressed: (){
                         // create submit form on sign up 
+                        _submitFormOnSignUp();
                       },
                       color: Colors.cyan,
                       elevation: 8,
