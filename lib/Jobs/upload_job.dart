@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:ijob_clone_app/Persistent/persistent.dart';
 import 'package:ijob_clone_app/Widgets/bottom_nav_bar.dart';
 
 class UploadJobNow extends StatefulWidget {
@@ -75,9 +77,56 @@ class _UploadJobNowState extends State<UploadJobNow> {
         ),
       );
     }
+    _showTaskCategoriesDialog({required Size size})
+    {
+      showDialog(context: context,
+      builder:(ctx){
+        return AlertDialog(
+          backgroundColor: Colors.black45,
+          title: Text(
+            'Job Category',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 20,color: Colors.white),),
+            content: Container(
+              width: size.width*0.9,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount:Persistent.jobCategoryList.length ,
+                itemBuilder: (ctx,index){
+                  return InkWell(
+                    onTap: (){
+                      setState(() {
+                        _jobCategoryController.text=Persistent.jobCategoryList[index];
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.arrow_right_alt_outlined,color: Colors.grey,),
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(Persistent.jobCategoryList[index]
+                          ,style: TextStyle(fontSize: 16,color: Colors.grey),),
+                        )
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: (){
+                Navigator.canPop(context) ? Navigator.pop(context) : null;
+              },
+               child: Text('Cancel',style: TextStyle(color: Colors.white,fontSize: 16),))
+            ],
+        );
+      });
+    }
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -90,21 +139,21 @@ class _UploadJobNowState extends State<UploadJobNow> {
       child: Scaffold(
         bottomNavigationBar: BottomNavigationBarForApp(indexNum:2),
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text('Upload Job Now'),
-          centerTitle: true,
-          // backgroundColor: Colors.blue,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.deepOrange.shade300,Colors.blueAccent],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          stops: const [0.2,0.9]
-          )
-      ),
-          ),
-          ),
+      //   appBar: AppBar(
+      //     title: Text('Upload Job Now'),
+      //     centerTitle: true,
+      //     // backgroundColor: Colors.blue,
+      //     flexibleSpace: Container(
+      //       decoration: BoxDecoration(
+      //   gradient: LinearGradient(
+      //     colors: [Colors.deepOrange.shade300,Colors.blueAccent],
+      //     begin: Alignment.centerLeft,
+      //     end: Alignment.centerRight,
+      //     stops: const [0.2,0.9]
+      //     )
+      // ),
+      //     ),
+      //     ),
           body: Center(
             child: Padding(
               padding: EdgeInsets.all(7.0),
@@ -143,7 +192,9 @@ class _UploadJobNowState extends State<UploadJobNow> {
                                 valueKey: 'JobCategory', 
                                 controller: _jobCategoryController,
                                 enabled: false,
-                                fct: (){}, 
+                                fct: (){
+                                  _showTaskCategoriesDialog(size: size);
+                                }, 
                                 maxLength: 100),
                               _textTitles(label: 'Job Title :'),
                               _textFormFields(
