@@ -8,7 +8,7 @@ class JobWidget extends StatefulWidget {
   final String uploadedBy;
   final String userImage;
   final String name;
-  final String recruitment;
+  final bool recruitment;
   final String email;
   final String location;
 
